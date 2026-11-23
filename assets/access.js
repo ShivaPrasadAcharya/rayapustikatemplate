@@ -149,9 +149,19 @@
       const t = new Date(), s = t.getSeconds(), m = t.getMinutes() + s / 60, h = (t.getHours() % 12) + m / 60;
       turn('clock-second', s * 6); turn('clock-minute', m * 6); turn('clock-hour', h * 30);
     }
-    tick();
-    setInterval(tick, 1000);
-    $('access-clock').addEventListener('click', () => {
+       setInterval(tick, 1000);
+
+    const pin = $('clock-face').querySelector('.clock-pin');
+    $('access-clock').addEventListener('click', event => {
+      if (event.detail !== 0 || event.pointerType) {
+        const matrix = pin.getScreenCTM();
+        if (!matrix) return;
+
+        const point = new DOMPoint(event.clientX, event.clientY)
+          .matrixTransform(matrix.inverse());
+        if (!pin.isPointInFill(point)) return;
+      }
+
       const now = Date.now();
       unlock({startedAt:now, expiresAt:now + SIX_HOURS, lastSeenAt:now, closedAt:null});
       $('search').focus();
